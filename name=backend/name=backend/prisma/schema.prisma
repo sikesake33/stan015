@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Listing {
+  id            Int       @id @default(autoincrement())
+  title         String
+  description   String
+  address       String
+  city          String
+  images        String[]   @default([])
+  // pricing separated: daily vs monthly
+  pricePerDay   Int?       // in cents
+  pricePerMonth Int?       // in cents
+  isAvailable   Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  bookings      Booking[]
+}
+
+model Booking {
+  id            Int       @id @default(autoincrement())
+  listing       Listing   @relation(fields: [listingId], references: [id])
+  listingId     Int
+  startDate     DateTime
+  endDate       DateTime
+  // rentType: "DAILY" or "MONTHLY"
+  rentType      RentType
+  totalAmount   Int       // in cents
+  paymentMethod PaymentMethod
+  customerName  String
+  customerPhone String
+  createdAt     DateTime  @default(now())
+}
+
+enum RentType {
+  DAILY
+  MONTHLY
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  OTHER
+}
